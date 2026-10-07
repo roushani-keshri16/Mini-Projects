@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Skyline — Weather Dashboard</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- Living sky background: JS toggles classes here based on real weather -->
+<div class="sky-bg" id="skyBg">
+  <div class="stars" id="stars"></div>
+  <div class="sun-glow" id="sunGlow"></div>
+  <div class="clouds" id="clouds">
+    <span class="cloud c1"></span>
+    <span class="cloud c2"></span>
+    <span class="cloud c3"></span>
+  </div>
+  <div class="rain" id="rain"></div>
+  <div class="snow" id="snow"></div>
+</div>
+
+<div class="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">◐</span>
+      <span class="brand-name">Skyline</span>
+    </div>
+
+    <div class="search-wrap">
+      <form class="search" id="searchForm" autocomplete="off">
+        <input type="text" id="cityInput" placeholder="Search a city — e.g. Ranchi, Jharkhand" />
+        <button type="submit" aria-label="Search">Search</button>
+      </form>
+      <div class="autocomplete-list" id="autocompleteList"></div>
+    </div>
+
+    <button class="geo-btn" id="geoBtn" title="Use my location">
+      <span>◎</span> My location
+    </button>
+
+    <button class="icon-toggle" id="unitToggle" title="Switch units">°C</button>
+    <button class="icon-toggle" id="themeToggle" title="Switch theme">🌙</button>
+  </header>
+
+  <div class="favorites-bar" id="favoritesBar">
+    <span class="fav-label">Saved:</span>
+    <div class="fav-chips" id="favChips"></div>
+    <button class="fav-add" id="favAddBtn" title="Save current city">+ Save this city</button>
+  </div>
+
+  <div class="alert-banner" id="weatherAlert" style="display:none;"></div>
+
+  <div class="api-banner" id="apiBanner">
+    Add your free OpenWeather API key in <code>config.js</code> (look for <code>API_KEY</code>) to activate live data.
+    <button class="retry-btn" id="retryBtn" style="display:none;">Retry</button>
+  </div>
+
+  <main>
+
+    <!-- HERO: current conditions -->
+    <section class="hero" id="hero">
+      <div class="hero-left">
+        <p class="location" id="locationName">— — —</p>
+        <p class="timestamp mono" id="localTime">--:--</p>
+        <div class="temp-row">
+          <span class="temp-big" id="tempNow">--°</span>
+          <img class="icon-big" id="iconNow" alt="" />
+        </div>
+        <p class="condition" id="conditionNow">Waiting for data</p>
+        <p class="feels mono">Feels like <span id="feelsLike">--°</span></p>
+        <p class="offline-note mono" id="offlineNote" style="display:none;">Showing last saved data — couldn't reach the server.</p>
+      </div>
+
+      <div class="hero-right" id="heroStats">
+        <div class="stat">
+          <span class="stat-label">Humidity</span>
+          <span class="stat-value mono" id="humidity">--%</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Wind</span>
+          <span class="stat-value mono" id="wind">-- km/h</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Pressure</span>
+          <span class="stat-value mono" id="pressure">-- hPa</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Visibility</span>
+          <span class="stat-value mono" id="visibility">-- km</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Sunrise</span>
+          <span class="stat-value mono" id="sunrise">--:--</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Sunset</span>
+          <span class="stat-value mono" id="sunset">--:--</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Air Quality</span>
+          <span class="stat-value mono" id="aqi">
+            <span class="aqi-dot" id="aqiDot"></span> <span id="aqiText">--</span>
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- WEEKLY SUMMARY -->
+    <section class="panel">
+      <h2>Weekly summary</h2>
+      <div class="summary-grid" id="summaryGrid">
+        <p class="empty-note">Weekly summary will appear here once a city is loaded.</p>
+      </div>
+    </section>
+
+    <!-- HOURLY STRIP -->
+    <section class="panel">
+      <h2>Next hours</h2>
+      <div class="hourly-strip" id="hourlyStrip">
+        <div class="skeleton-row">
+          <span class="skeleton skel-chip"></span><span class="skeleton skel-chip"></span>
+          <span class="skeleton skel-chip"></span><span class="skeleton skel-chip"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5-DAY FORECAST -->
+    <section class="panel">
+      <h2>5-day forecast</h2>
+      <div class="forecast-grid" id="forecastGrid">
+        <span class="skeleton skel-card"></span><span class="skeleton skel-card"></span>
+        <span class="skeleton skel-card"></span><span class="skeleton skel-card"></span>
+      </div>
+    </section>
+
+    <!-- COMPARE CITIES -->
+    <section class="panel" id="comparePanel" style="display:none;">
+      <h2>Compare your saved cities</h2>
+      <div class="compare-grid" id="compareGrid"></div>
+    </section>
+
+    <!-- CHARTS -->
+    <section class="panel charts-panel">
+      <div class="chart-card">
+        <h2>Temperature trend <span class="sub">(forecast)</span></h2>
+        <canvas id="tempChart" height="220"></canvas>
+      </div>
+      <div class="chart-card">
+        <h2>Recorded history <span class="sub">(auto-logged on this device)</span></h2>
+        <canvas id="historyChart" height="220"></canvas>
+        <p class="chart-note">Every day you open this dashboard, today's reading is saved locally — so this chart grows into a real history over time.</p>
+      </div>
+    </section>
+
+    <!-- MAP -->
+    <section class="panel">
+      <h2>Weather map</h2>
+      <div class="map-layers" id="mapLayers">
+        <button class="layer-btn active" data-layer="precipitation_new">Precipitation</button>
+        <button class="layer-btn" data-layer="clouds_new">Clouds</button>
+        <button class="layer-btn" data-layer="temp_new">Temperature</button>
+        <button class="layer-btn" data-layer="wind_new">Wind</button>
+      </div>
+      <div id="weatherMap"></div>
+    </section>
+
+  </main>
+
+  <footer>
+    <p>Skyline Weather Dashboard · Data by OpenWeather · Built with Chart.js &amp; Leaflet</p>
+  </footer>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="config.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

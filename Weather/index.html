@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ultimate Weather App</title>
+
+<link rel="stylesheet" href="style.css">
+
+<!-- Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<!-- Chart -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Map -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+</head>
+<body>
+
+<button id="themeToggle">🌙</button>
+
+<div class="container">
+
+ <div class="left">
+  <div class="card greeting-card">
+    <div class="greeting-top">
+      <div>
+        <p id="greet">Good Morning, John</p>
+        <h1 id="time"></h1>
+        <small id="dateStr"></small>
+      </div>
+      <div style="text-align:right">
+        <span id="locationName"></span>
+      </div>
+    </div>
+    <div class="greeting-bottom">
+      <div>
+        <small>Weather Forecast</small>
+        <h3 id="mainWeatherDesc">Partly Cloudy</h3>
+        <small id="subDesc">Isolated thunderstorms, Precipitation: 30%</small>
+      </div>
+      <img id="greetIcon" width="80">
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Hourly Forecast</h3>
+    <canvas id="chart"></canvas>
+  </div>
+
+  <div class="card bottom-row">
+    <div class="rainfall-box">
+      <h3>Monthly Rainfall</h3>
+      <canvas id="rainfallChart"></canvas>
+    </div>
+    <div class="map-box">
+      <h3>World Weather Reader</h3>
+      <div id="map"></div>
+    </div>
+  </div>
+</div>
+
+  <div class="right">
+    <div class="search">
+      <input type="text" id="city">
+      <button onclick="getWeather()"><i class="fa fa-search"></i></button>
+      <button onclick="getLocation()">
+  <i class="fa fa-location-arrow"></i>
+</button>
+    </div>
+
+    <div class="weather-box">
+      <img id="icon">
+      <h1 id="temp"></h1>
+      <p id="desc"></p>
+      <div id="rain"></div>
+
+      <div class="details">
+        <span id="humidity"></span>
+        <span id="wind"></span>
+      </div>
+    </div>
+
+    <div id="forecast"></div>
+  </div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
