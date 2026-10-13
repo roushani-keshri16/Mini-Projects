@@ -6,7 +6,7 @@ A beautiful, modern, and fully responsive **Sign-In and Sign-Up form** with smoo
 
 ## 🚀 Live Demo
 Click here to view the live browser preview of this project:
-👉 [ https://roushani-keshri16.github.io/ANIMATED-SIGN-IN-SIGN-UP-PAGE/]
+👉 [https://roushani-keshri16.github.io/Mini-Projects/ANIMATED-SIGN-IN-SIGN-UP-PAGE/]
 
 ---
 
